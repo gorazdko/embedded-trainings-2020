@@ -81,5 +81,8 @@ fn main() -> ! {
         }
     }
 
+    let string2 = str::from_utf8(&x).expect("response was not valid UTF-8 data");
+    defmt::println!("Decrypted text: {}", string2);
+
     dk::exit()
 }
