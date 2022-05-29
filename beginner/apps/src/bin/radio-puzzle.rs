@@ -38,12 +38,12 @@ fn main() -> ! {
     // let msg: &[u8; 1] = &[b'A'];
     // let msg: &[u8; 1] = &[65];
 
-    let mut map: LinearMap<u8, u8, { 127 - 31 }> = LinearMap::new();
+    let mut map: LinearMap<u8, u8, { 128 }> = LinearMap::new();
     let mut x: Vec<u8, 8> = Vec::new(); // can hold up to 8 elements
 
     let mut msg = b"a";
 
-    for i in 32..127 {
+    for i in 0..=127 {
         let msg = &[i];
         packet.copy_from_slice(msg);
         defmt::println!(
