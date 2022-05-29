@@ -31,7 +31,7 @@ fn main() -> ! {
     let mut packet = Packet::new();
 
     let mut map: LinearMap<u8, u8, { 128 }> = LinearMap::new();
-    let mut x: Vec<u8, 8> = Vec::new(); // can hold up to 8 elements
+    let mut x: Vec<u8, 100> = Vec::new(); // can hold up to 8 elements
 
     let mut msg = b"a";
 
@@ -65,11 +65,20 @@ fn main() -> ! {
     let msg = b"";
     packet.copy_from_slice(msg);
     radio.send(&mut packet);
-    if radio.recv_timeout(&mut packet, &mut timer, TEN_MS).is_ok() {
-        defmt::println!(
-            "received encrypted text: {}",
-            str::from_utf8(&packet).expect("response was not valid UTF-8 data")
-        );
+    let st: &str = if radio.recv_timeout(&mut packet, &mut timer, TEN_MS).is_ok() {
+        let string1 = str::from_utf8(&packet).expect("response was not valid UTF-8 data");
+        defmt::println!("received encrypted text: {}", string1.clone());
+        string1
+    } else {
+        ""
+    };
+
+    for el in st.bytes() {
+        for (key, val) in map.iter() {
+            if val == &el {
+                x.push(*key).unwrap();
+            }
+        }
     }
 
     dk::exit()
