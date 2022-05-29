@@ -30,14 +30,6 @@ fn main() -> ! {
 
     let mut packet = Packet::new();
 
-    // try one of these 3 options
-    let msg = b"";
-
-    // these 3 lines are equivalent
-    let msg: &[u8; 1] = b"A";
-    // let msg: &[u8; 1] = &[b'A'];
-    // let msg: &[u8; 1] = &[65];
-
     let mut map: LinearMap<u8, u8, { 128 }> = LinearMap::new();
     let mut x: Vec<u8, 8> = Vec::new(); // can hold up to 8 elements
 
@@ -67,5 +59,18 @@ fn main() -> ! {
             defmt::error!("no response or response packet was corrupted");
         }
     }
+
+    // fetch the encrypoted string
+    timer.wait(Duration::from_millis(20));
+    let msg = b"";
+    packet.copy_from_slice(msg);
+    radio.send(&mut packet);
+    if radio.recv_timeout(&mut packet, &mut timer, TEN_MS).is_ok() {
+        defmt::println!(
+            "received encrypted text: {}",
+            str::from_utf8(&packet).expect("response was not valid UTF-8 data")
+        );
+    }
+
     dk::exit()
 }
