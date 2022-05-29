@@ -84,5 +84,18 @@ fn main() -> ! {
     let string2 = str::from_utf8(&x).expect("response was not valid UTF-8 data");
     defmt::println!("Decrypted text: {}", string2);
 
+    // send the decreypted text to the dongle to receive the confirmation of the solution
+
+    packet.copy_from_slice(string2.as_bytes());
+    radio.send(&mut packet);
+    if radio.recv_timeout(&mut packet, &mut timer, TEN_MS).is_ok() {
+        let string1 = str::from_utf8(&packet).expect("response was not valid UTF-8 data");
+        defmt::println!("received encrypted text: {}", string1.clone());
+
+        assert_eq!(string1, "correct");
+    } else {
+        panic!("confirmation not received")
+    }
+
     dk::exit()
 }
