@@ -36,7 +36,8 @@ overflow-checks = false
 [features]
 # set defmt logging levels here
 default = [
-  "defmt-default",
+  "defmt-trace",
+  #"defmt-default",
   # "dependency-a/defmt-trace",
 ]
 

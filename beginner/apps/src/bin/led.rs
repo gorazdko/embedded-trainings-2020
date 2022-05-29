@@ -14,9 +14,9 @@ fn main() -> ! {
     let board = dk::init().unwrap();
 
     let mut leds = board.leds;
-    leds._1.on();
+    leds._1.off();
     leds._2.off();
-    leds._3.off();
+    leds._3.on();
     leds._4.on();
 
     // this program does not `exit`; use Ctrl+C to terminate it

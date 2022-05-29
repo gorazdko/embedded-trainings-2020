@@ -6,6 +6,13 @@ use core::str;
 
 use cortex_m_rt::entry;
 use dk::ieee802154::{Channel, Packet};
+
+use core::time::Duration;
+use heapless::LinearMap; // for storing character mappings
+use heapless::Vec; // for storing byte arrays
+
+// byte literal: b'c' vs. character literal 'c'
+
 // this imports `beginner/apps/lib.rs` to retrieve our global logger + panicking-behavior
 use apps as _;
 
@@ -27,26 +34,38 @@ fn main() -> ! {
     let msg = b"";
 
     // these 3 lines are equivalent
-    // let msg: &[u8; 1] = b"A";
+    let msg: &[u8; 1] = b"A";
     // let msg: &[u8; 1] = &[b'A'];
     // let msg: &[u8; 1] = &[65];
 
-    // let msg = b"Hello?";
+    let mut map: LinearMap<u8, u8, { 127 - 31 }> = LinearMap::new();
+    let mut x: Vec<u8, 8> = Vec::new(); // can hold up to 8 elements
 
-    packet.copy_from_slice(msg);
-    defmt::println!(
-        "sending: {}",
-        str::from_utf8(msg).expect("msg was not valid UTF-8 data")
-    );
+    let mut msg = b"a";
 
-    radio.send(&mut packet);
-    if radio.recv_timeout(&mut packet, &mut timer, TEN_MS).is_ok() {
+    for i in 32..127 {
+        let msg = &[i];
+        packet.copy_from_slice(msg);
         defmt::println!(
-            "received: {}",
-            str::from_utf8(&packet).expect("response was not valid UTF-8 data")
+            "sending: {}",
+            str::from_utf8(msg).expect("msg was not valid UTF-8 data")
         );
-    } else {
-        defmt::error!("no response or response packet was corrupted");
+
+        timer.wait(Duration::from_millis(20));
+        radio.send(&mut packet);
+        if radio.recv_timeout(&mut packet, &mut timer, TEN_MS).is_ok() {
+            defmt::println!(
+                "received: {}",
+                str::from_utf8(&packet).expect("response was not valid UTF-8 data")
+            );
+
+            if packet.len() != 1 {
+                panic!("packet len not 1");
+            }
+            map.insert(i, packet[0]).expect("dictionary full");
+        } else {
+            defmt::error!("no response or response packet was corrupted");
+        }
     }
     dk::exit()
 }

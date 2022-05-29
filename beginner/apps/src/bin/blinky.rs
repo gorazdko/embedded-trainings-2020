@@ -17,9 +17,9 @@ fn main() -> ! {
     let mut led = board.leds._1;
     let mut timer = board.timer;
 
-    for _ in 0..10 {
+    for _ in 0..100 {
         led.toggle();
-        timer.wait(Duration::from_secs(1));
+        timer.wait(Duration::from_millis(200));
         defmt::println!("LED toggled at {:?}", dk::uptime());
     }
 
