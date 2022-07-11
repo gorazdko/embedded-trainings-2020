@@ -12,6 +12,7 @@ mod app {
     #[local]
     struct MyLocalResources {
         power: POWER,
+        counter: u32,
     }
 
     #[shared]
@@ -29,7 +30,7 @@ mod app {
 
         (
             MySharedResources {},
-            MyLocalResources { power },
+            MyLocalResources { power, counter: 0 },
             init::Monotonics(),
         )
     }
@@ -43,13 +44,15 @@ mod app {
         }
     }
 
-    #[task(binds = POWER_CLOCK, local = [power])]
+    #[task(binds = POWER_CLOCK, local = [power, counter])]
     //                                      ^^^^^^^ resource access list
     fn on_power_event(cx: on_power_event::Context) {
-        defmt::println!("POWER event occurred");
-
         // resources available to this task
         let resources = cx.local;
+        let counter = resources.counter;
+        *counter = *counter + 1;
+
+        defmt::println!("POWER event occurred {:?}", *counter);
 
         // the POWER peripheral can be accessed through a reference
         let power: &mut POWER = resources.power;

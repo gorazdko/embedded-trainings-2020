@@ -50,9 +50,13 @@ mod app {
         defmt::println!("USB: {} @ {}", event, dk::uptime());
 
         match event {
-            Event::UsbReset => todo!(),
+            Event::UsbReset =>
+            /*todo!()*/
+            {
+                defmt::println!("default state")
+            }
 
-            Event::UsbEp0DataDone => todo!(),
+            Event::UsbEp0DataDone => defmt::println!("data done"),
             // leave this at it is for now.
             Event::UsbEp0Setup => {
                 defmt::println!("goal reached; move to the next section");

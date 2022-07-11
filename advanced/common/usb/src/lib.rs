@@ -64,6 +64,28 @@ impl Request {
         //    - `wIndex` is 0 (i.e. no language ID since it's not a string descriptor)
         //
         // For more details, see https://embedded-trainings.ferrous-systems.com/setup-stage.html
+        if bmrequesttype == 0b10000000 && brequest == 6 {
+            let wvalue_arr = wvalue.to_be_bytes();
+            let descriptor_type = wvalue_arr[0];
+            let descriptor_index = wvalue_arr[1];
+
+            if descriptor_type != 1 {
+                return Err(());
+            }
+
+            //if descriptor_index != 0 {
+            //    return Err(());
+            //}
+
+            let req = Request::GetDescriptor {
+                /// Requested descriptor
+                descriptor: Descriptor::Device,
+                /// How many bytes of data to return
+                length: wlength,
+            };
+
+            return Ok(req);
+        }
 
         if bmrequesttype == 0b00000000 && brequest == SET_ADDRESS {
             // Set the device address for all future accesses.
@@ -78,7 +100,7 @@ impl Request {
                 Err(())
             }
         } else {
-            defmt::println!("unhandled case in `Request` parser");
+            //defmt::println!("unhandled case in `Request` parser");
             Err(())
         }
     }
@@ -91,7 +113,7 @@ pub enum Descriptor {
     Device,
 
     /// Configuration descriptor
-    #[cfg(TODO)]
+    //#[cfg(TODO)]
     Configuration {
         /// Index of the descriptor
         index: u8,
