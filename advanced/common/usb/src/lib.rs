@@ -73,9 +73,13 @@ impl Request {
                 return Err(());
             }
 
-            //if descriptor_index != 0 {
-            //    return Err(());
-            //}
+            if descriptor_index != 0 {
+                return Err(());
+            }
+
+            if windex != 0 {
+                return Err(());
+            }
 
             let req = Request::GetDescriptor {
                 /// Requested descriptor
