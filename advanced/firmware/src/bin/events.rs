@@ -47,7 +47,7 @@ mod app {
         //                                               ^^^^^^^^^^ bitfield name
         defmt::println!("USBREGSTATUS.VBUSDETECT: {}", vbusdetect);
 
-        loop {}
+        //loop {}
 
         (
             MySharedResources {},

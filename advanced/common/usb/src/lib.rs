@@ -77,6 +77,8 @@ impl Request {
                 return Err(());
             }
 
+            defmt::println!("here 3");
+
             if windex != 0 {
                 return Err(());
             }

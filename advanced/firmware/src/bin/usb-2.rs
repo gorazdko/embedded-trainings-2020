@@ -78,7 +78,7 @@ mod app {
                     | u16::from(usbd.wvaluel.read().wvaluel().bits());
 
                 defmt::println!(
-                    "SETUP: bmrequesttype: {}, brequest: {}, wlength: {}, windex: {}, wvalue: {}",
+                    "*SETUP: bmrequesttype: {}, brequest: {}, wlength: {}, windex: {}, wvalue: {}",
                     bmrequesttype,
                     brequest,
                     wlength,
@@ -87,7 +87,7 @@ mod app {
                 );
 
                 let request = Request::parse(bmrequesttype, brequest, wvalue, windex, wlength)
-                    .expect("Error parsing request");
+                    .expect("Error parsing request**");
                 match request {
                     Request::GetDescriptor { descriptor, length }
                         if descriptor == Descriptor::Device =>
