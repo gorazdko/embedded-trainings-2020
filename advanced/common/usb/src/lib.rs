@@ -30,7 +30,7 @@ pub enum Request {
 
     /// SET_CONFIGURATION
     // see section 9.4.7 of the USB specification
-    #[cfg(TODO)]
+    //#[cfg(TODO)]
     SetConfiguration {
         /// bConfigurationValue to change the device to
         value: Option<NonZeroU8>,
@@ -95,6 +95,14 @@ impl Request {
                 descriptor: Descriptor::Device,
                 /// How many bytes of data to return
                 length: wlength,
+            };
+
+            return Ok(req);
+        }
+
+        if bmrequesttype == 0b00000000 && brequest == 9 && windex == 0 && wlength == 0 {
+            let req = Request::SetConfiguration {
+                value: NonZeroU8::new(wvalue as u8),
             };
 
             return Ok(req);
@@ -206,7 +214,7 @@ mod tests {
         //                                                 ^^^^
     }
 
-    #[cfg(TODO)]
+    //#[cfg(TODO)]
     #[test]
     fn set_configuration() {
         // OK: SET_CONFIGURATION 1
