@@ -69,17 +69,24 @@ impl Request {
             let descriptor_type = wvalue_arr[0];
             let descriptor_index = wvalue_arr[1];
 
-            if descriptor_type != 1 {
-                return Err(());
-            }
-
             if descriptor_index != 0 {
                 return Err(());
             }
 
-            defmt::println!("here 3");
-
             if windex != 0 {
+                return Err(());
+            }
+
+            if descriptor_type == 2 {
+                // TODO HERE CURRENTLY
+                let req = Request::GetDescriptor {
+                    descriptor: Descriptor::Configuration { index: 0 },
+                    length: 9,
+                };
+                return Ok(req);
+            }
+
+            if descriptor_type != 1 {
                 return Err(());
             }
 
@@ -182,7 +189,7 @@ mod tests {
         //                                                    ^
     }
 
-    #[cfg(TODO)]
+    //#[cfg(TODO)]
     #[test]
     fn get_descriptor_configuration() {
         // OK: GET_DESCRIPTOR Configuration 0 [length=9]
