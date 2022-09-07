@@ -63,7 +63,8 @@ mod app {
             // TODO change `state` as specified in chapter 9.1 USB Device States, of the USB specification
             Event::UsbReset => {
                 defmt::println!("USB reset condition detected");
-                todo!();
+                //todo!();
+                *state = State::Default;
             }
 
             Event::UsbEp0DataDone => {
@@ -81,7 +82,7 @@ mod app {
         }
     }
 
-    fn ep0setup(usbd: &USBD, ep0in: &mut Ep0In, _state: &mut State) -> Result<(), ()> {
+    fn ep0setup(usbd: &USBD, ep0in: &mut Ep0In, state: &mut State) -> Result<(), ()> {
         let bmrequesttype = usbd.bmrequesttype.read().bits() as u8;
         let brequest = usbd.brequest.read().brequest().bits();
         let wlength = usbd::wlength(usbd);
@@ -127,18 +128,34 @@ mod app {
                 // Descriptor::Configuration { .. } => todo!(),
 
                 // stall any other request
-                _ => return Err(()),
+                _ => dk::usbd::ep0stall(usbd), /*return Err(())*/
             },
-            Request::SetAddress { .. } => {
+            Request::SetAddress { address } => {
                 // On Mac OS you'll get this request before the GET_DESCRIPTOR request so we
                 // need to catch it here.
 
+                match *state {
+                    State::Default => {
+                        if address.is_some() {
+                            *state = State::Address(address.unwrap());
+                        }
+                    }
+                    State::Address(x) => {
+                        if x == NonZeroU8::new(0).unwrap() {
+                            *state = State::Default;
+                        } else {
+                            *state = State::Address(address.unwrap());
+                        }
+                    }
+                    _ => dk::usbd::ep0stall(usbd),
+                }
+
                 // TODO: handle this request properly now.
-                todo!()
+                //todo!()
             }
 
             // stall any other request
-            _ => return Err(()),
+            _ => dk::usbd::ep0stall(usbd), //return Err(()),
         }
 
         Ok(())
