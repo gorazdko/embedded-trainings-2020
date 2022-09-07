@@ -3,6 +3,8 @@
 
 // this imports `beginner/apps/lib.rs` to retrieve our global logger + panicking-behavior
 use firmware as _;
+//use heapless::consts::*;
+//use heapless::Vec;
 
 #[rtic::app(device = dk, peripherals = false)]
 mod app {
@@ -129,7 +131,7 @@ mod app {
                     }
 
                     let configD = usb2::configuration::Descriptor {
-                        bNumInterfaces: 1,
+                        bNumInterfaces: core::num::NonZeroU8::new(1).unwrap(),
                         wTotalLength: 18,
                         bConfigurationValue: core::num::NonZeroU8::new(42).unwrap(),
                         iConfiguration: None,
@@ -139,6 +141,29 @@ mod app {
                         },
                         bMaxPower: 250,
                     };
+
+                    let interfaceD = usb2::interface::Descriptor {
+                        bInterfaceNumber: 0,
+                        bAlternativeSetting: 0,
+                        bNumEndpoints: 0,
+                        bInterfaceClass: 0,
+                        bInterfaceSubClass: 0,
+                        bInterfaceProtocol: 0,
+                        iInterface: None,
+                    };
+
+                    let cD = configD.bytes();
+                    let iD = interfaceD.bytes();
+                    let sizeD = cD.len() + iD.len();
+
+                    let mut bytes = heapless::Vec::<u8, 1000>::new();
+                    bytes.extend_from_slice(&cD).unwrap();
+                    bytes.extend_from_slice(&iD).unwrap();
+
+                    let _ = ep0in.start(
+                        &bytes[..core::cmp::min(/*bytes.len()*/ sizeD, length.into())],
+                        usbd,
+                    );
                 }
 
                 // TODO implement Configuration descriptor
