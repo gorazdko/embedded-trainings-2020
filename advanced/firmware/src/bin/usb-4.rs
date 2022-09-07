@@ -175,12 +175,24 @@ mod app {
             Request::SetConfiguration { c } => match *state {
                 State::Default => dk::usbd::ep0stall(usbd),
                 State::Address(x) => {
-                    if x == NonZeroU8::new(0).unwrap() {
+                    if c == NonZeroU8::new(0).unwrap() {
+                        // TODO check for c if it is VALID??? https://embedded-trainings.ferrous-systems.com/getting-device-configured.html
                         cortex_m::asm::nop();
                     } else {
                         *state = State::Configured {
                             address: x.unwrap(),
                             value: c.unwrap(),
+                        };
+                    }
+                }
+                State::Configured { address, value } => {
+                    if value.is_none() {
+                        *state = State::Address(address.unwrap());
+                    } else {
+                        // TODO check for value (=wvalue) if it is VALID???
+                        *state = State::Configured {
+                            address: address,
+                            value: value,
                         };
                     }
                 }
