@@ -123,6 +123,23 @@ mod app {
                     let bytes = desc.bytes();
                     let _ = ep0in.start(&bytes[..core::cmp::min(bytes.len(), length.into())], usbd);
                 }
+                Descriptor::Configuration { index } => {
+                    if index != 0 {
+                        dk::usbd::ep0stall(usbd)
+                    }
+
+                    let configD = usb2::configuration::Descriptor {
+                        bNumInterfaces: 1,
+                        wTotalLength: 18,
+                        bConfigurationValue: core::num::NonZeroU8::new(42).unwrap(),
+                        iConfiguration: None,
+                        bmAttributes: usb2::configuration::bmAttributes {
+                            self_powered: true,
+                            remote_wakeup: false,
+                        },
+                        bMaxPower: 250,
+                    };
+                }
 
                 // TODO implement Configuration descriptor
                 // Descriptor::Configuration { .. } => todo!(),
