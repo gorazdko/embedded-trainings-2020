@@ -172,6 +172,20 @@ mod app {
                 // stall any other request
                 _ => dk::usbd::ep0stall(usbd), /*return Err(())*/
             },
+            Request::SetConfiguration { c } => match *state {
+                State::Default => dk::usbd::ep0stall(usbd),
+                State::Address(x) => {
+                    if x == NonZeroU8::new(0).unwrap() {
+                        cortex_m::asm::nop();
+                    } else {
+                        *state = State::Configured {
+                            address: x.unwrap(),
+                            value: c.unwrap(),
+                        };
+                    }
+                }
+                _ => dk::usbd::ep0stall(usbd),
+            },
             Request::SetAddress { address } => {
                 // On Mac OS you'll get this request before the GET_DESCRIPTOR request so we
                 // need to catch it here.
