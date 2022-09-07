@@ -172,22 +172,22 @@ mod app {
                 // stall any other request
                 _ => dk::usbd::ep0stall(usbd), /*return Err(())*/
             },
-            Request::SetConfiguration { c } => match *state {
+            Request::SetConfiguration { value } => match *state {
                 State::Default => dk::usbd::ep0stall(usbd),
                 State::Address(x) => {
-                    if c == NonZeroU8::new(0).unwrap() {
-                        // TODO check for c if it is VALID??? https://embedded-trainings.ferrous-systems.com/getting-device-configured.html
+                    if value == NonZeroU8::new(0) {
+                        // TODO check for c if it is VALID??? < 128 try it out> https://embedded-trainings.ferrous-systems.com/getting-device-configured.html
                         cortex_m::asm::nop();
                     } else {
                         *state = State::Configured {
-                            address: x.unwrap(),
-                            value: c.unwrap(),
+                            address: x,
+                            value: value.unwrap(),
                         };
                     }
                 }
                 State::Configured { address, value } => {
-                    if value.is_none() {
-                        *state = State::Address(address.unwrap());
+                    if value == NonZeroU8::new(0).unwrap() {
+                        *state = State::Address(address);
                     } else {
                         // TODO check for value (=wvalue) if it is VALID???
                         *state = State::Configured {
@@ -195,7 +195,7 @@ mod app {
                             value: value,
                         };
                     }
-                }
+                } // TODO: This is done by writing 1 to the TASKS_EP0STATUS register.
                 _ => dk::usbd::ep0stall(usbd),
             },
             Request::SetAddress { address } => {
